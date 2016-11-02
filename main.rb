@@ -83,6 +83,8 @@ post '/csr' do
   #{}"#{stdout} \n #{stderr} \n #{exit_status} \n OK"
   if File.exists?(crt_tmp_file) && File.readable?(crt_tmp_file) && File.size(crt_tmp_file) > 0
     send_file crt_tmp_file, :filename => crt_tmp_file, :type => 'Application/octet-stream'
+    File.delete(crt_tmp_file)
+    File.delete(csr_tmp_file)
   else
     message = "Something went wrong \n STDOUT: #{stdout} \n STDERR: #{stderr} \n Exit Code: #{exit_status} \n OK"
     STDERR.print message
