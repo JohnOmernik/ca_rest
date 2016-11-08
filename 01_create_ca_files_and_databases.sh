@@ -42,6 +42,8 @@ if [[ ! -e /usr/bin/openssl ]]; then
   exit 1
 fi
 
+echo "** If at any point this script fails, you probably want to just 'rm -rf ${$CA_HOME_DIR}' and start over."
+
 # create folders for our default ca
 mkdir -p $CA_HOME/private
 mkdir -p $CA_HOME/certs
