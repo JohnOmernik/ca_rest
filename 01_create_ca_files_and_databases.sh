@@ -29,7 +29,9 @@ mkdir -p $CA_HOME/certs
 mkdir -p $CA_HOME/newcerts
 touch $CA_HOME/index.txt
 echo "00" > $CA_HOME/serial
+echo "${CA_PASS}" > $CA_HOME/private/capass.txt
 chmod 700 $CA_HOME
+chmod 600 $CA_HOME/private/capass.txt
 
 # create config heredoc
 cat << EOF > $CA_HOME/openssl.cnf

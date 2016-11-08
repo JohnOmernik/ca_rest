@@ -3,36 +3,56 @@
 require "sinatra"
 require "open3"
 
-if ARGV.size != 3
-  print "You must specify a port to listen on,the CA root folder, and a CA Password. ./main.rb 3000 /ca_rest myCAPassword\n"
+# we check the environment variables first to see if things are necessary.
+bind_port = ""
+ca_root_dir = ""
+ca_password = ""
+
+["SERVER_PORT","CA_ROOT"].each do |var|
+  if ENV[var].nil?
+    print "Environmental variable not set: #{var} \n\nEnvironmental variables required: \n"
+    print "\tSERVER_PORT\tThe port you want the CA REST server to listen on.\n"
+    print "\tCA_ROOT\t\tThe directory where your CA is installed.\n"
+    abort
+  end
+end
+
+
+bind_port = ENV['SERVER_PORT']
+ca_root_dir = ENV['CA_ROOT']
+ca_password_file = ca_root_dir + "/private/capass.txt"
+
+unless bind_port.match(/[0-9]+/)
+  print "Server Port must be numeric. \n"
   abort
 end
 
-BIND_PORT = ARGV[0]
-CA_ROOT_DIR = ARGV[1]
-CA_PASSWORD =  ARGV[2]
-
-unless BIND_PORT.match(/[0-9]+/)
-  print "Ports must be numeric: ./main.rb 3000 /rest_ca myCAPassword \n"
+unless Dir.exists?(ca_root_dir) && File.readable?(ca_root_dir)
+  print "CA root directory does not exist or is not readable: #{ca_root_dir}\n"
   abort
 end
 
-unless Dir.exists?(CA_ROOT_DIR) && File.readable?(CA_ROOT_DIR)
-  print "CA root directory does not exist or is not readable: #{CA_ROOT_DIR}\n"
+if File.exists?(ca_password_file) && File.readable?(ca_password_file)
+  ca_password = File.read(ca_password_file).chomp
+else
+  print "CA root password file does not exist or is not readable: #{ca_password_file}\n"
   abort
 end
 
-unless CA_PASSWORD.size > 0 && CA_PASSWORD.match(/[a-zA-Z0-9]+/)
-  print "CA password must be specified: ./main.rb 3000 /rest_ca myCAPassword \n"
+unless ca_password.match(/[[:ascii:]]+/)
+  print "CA password does not look like a password: #{ca_password} \n"
   abort
 end
+
+print "Bind port set to #{bind_port} \n"
+print "CA Root Dir: #{ca_root_dir} \n"
 
 enable :logging
-set :port, BIND_PORT
+set :port, bind_port
 set :bind, "0.0.0.0"
 
 get '/cacert' do
-  crt_file = "#{CA_ROOT_DIR}/cacert.pem"
+  crt_file = "#{ca_root_dir}/cacert.pem"
   if File.exists?(crt_file) && File.readable?(crt_file) && File.size(crt_file) > 0
     send_file crt_file, :filename => 'cacert.pem', :type => 'Application/octet-stream'
   else
@@ -47,7 +67,7 @@ post '/csr' do
   app_root = File.dirname(__FILE__)
   working_directory = app_root + "/tmp"
   id = Time.now.to_i + rand(33000)
-  openssl_ca_config = "#{CA_ROOT_DIR}/openssl.cnf"
+  openssl_ca_config = "#{ca_root_dir}/openssl.cnf"
   openssl_cmd = '/usr/bin/openssl'
 
   unless File.exists?(openssl_ca_config) && File.readable?(openssl_ca_config)
@@ -77,19 +97,20 @@ post '/csr' do
 
   # sign and return cert using 03
   STDERR.puts "Signing csr and generating cert file output, cert: #{crt_tmp_file}"
-  openssl_sign_csr_cmd = "#{openssl_cmd} ca -batch -config #{openssl_ca_config} -days 375 -passin pass:#{CA_PASSWORD} -in #{csr_tmp_file} -out #{crt_tmp_file}"
+  openssl_sign_csr_cmd = "#{openssl_cmd} ca -batch -config #{openssl_ca_config} -days 375 -passin pass:#{ca_password} -in #{csr_tmp_file} -out #{crt_tmp_file}"
   stdout, stderr, exit_status = Open3.capture3(openssl_sign_csr_cmd)
 
   #{}"#{stdout} \n #{stderr} \n #{exit_status} \n OK"
   if File.exists?(crt_tmp_file) && File.readable?(crt_tmp_file) && File.size(crt_tmp_file) > 0
+    status 200
     send_file crt_tmp_file, :filename => crt_tmp_file, :type => 'Application/octet-stream'
-    File.delete(crt_tmp_file)
-    File.delete(csr_tmp_file)
+    File.delete(crt_tmp_file) if File.exists?(crt_tmp_file)
+    File.delete(csr_tmp_file) if File.exists?(csr_tmp_file)
   else
     message = "Something went wrong \n STDOUT: #{stdout} \n STDERR: #{stderr} \n Exit Code: #{exit_status} \n OK"
     STDERR.print message
     status 500
-    message
+    "#{message}"
   end
 end
 
