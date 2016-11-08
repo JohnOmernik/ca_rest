@@ -1,4 +1,5 @@
 #!/usr/bin/env ruby
+# Optional certificate generation script. Can be run anywhere and pointed at the CA REST interface to get a signed certificate securely.
 
 # libs
 require 'rest-client'
@@ -23,6 +24,11 @@ CERT_BASE = "server_cert_#{Time.now.strftime("%Y-%m-%d")}"
 KEY_FILE = CERT_FOLDER + "/" + CERT_BASE + "-key.pem"
 CERT_FILE = CERT_FOLDER + "/" + CERT_BASE + "-signed-cert.pem"
 CSR_FILE = CERT_FOLDER + "/" + CERT_BASE + ".csr"
+CERT_C = "US"
+CERT_ST = "CA"
+CERT_L = "Redwood City"
+CERT_O = SERVICE_NAME
+CERT_CN = SERVICE_NAME
 
 
 # defs
@@ -73,7 +79,7 @@ end
 
 
 # generate our CSR
-create_csr_cmd = "#{OPENSSL} req -new -passin pass:#{KEY_PASSWORD} -key #{KEY_FILE} -out #{CSR_FILE} -subj \"/C=US/ST=CA/L=Redwood City/O=#{SERVICE_NAME}/CN=#{SERVICE_NAME}\""
+create_csr_cmd = "#{OPENSSL} req -new -passin pass:#{KEY_PASSWORD} -key #{KEY_FILE} -out #{CSR_FILE} -subj \"/C=#{CERT_C}/ST=#{CERT_ST}/L=#{CERT_L}/O=#{CERT_O}/CN=#{CERT_CN}\""
 print "Generating certificate signature request file..\n"
 not_used = run_cmd(create_csr_cmd, "OpenSSL command exited strangely or could not create a CSR file or it never appeared in the output directory. Aborting. \n")
 
