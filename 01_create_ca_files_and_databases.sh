@@ -2,13 +2,32 @@
 # creates a CA environment, database, and file structure to store certs and sign them.
 # assumes the first argument is the CA dir root desired.
 
-if [[ $# -lt 2 ]] ; then
-  echo "This script requires a CA root target directory and a CA password."
-  echo "Usage: $0 /etc/ssl/CA myCAPassword"
+if [[ $# -lt 1 ]] ; then
+  echo "This script requires a CA root target directory."
+  echo "Usage: $0 /etc/ssl/CA"
   exit 1
 fi
 
-CA_PASS=$2
+echo "Provide a CA key passphrase, minimum 4 characters, and press enter: "
+read -s user_pass1
+echo "Enter the same password again for validation: "
+read -s user_pass2
+
+# If the passwords don't match, keep asking for passwords until they do
+while [ "$user_pass1" != "$user_pass2" ] || [ ${#user_pass1} -lt 4 ] ; do
+    if [ ${#user_pass1} -lt 5 ] ; then
+      echo "Passwords entered are not long enough, please try again."
+    else
+      echo "Passwords entered for do not match, please try again."
+    fi
+
+    echo "Provide a CA key passphrase, minimum 4 characters, and press enter: "
+    read -s user_pass1
+    echo "Enter the same password again for validation: "
+    read -s user_pass2
+done
+
+CA_PASS=$user_pass1
 CA_HOME=$1
 CA_HOME_DIR=$(dirname $CA_HOME)
 
