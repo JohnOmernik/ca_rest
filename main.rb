@@ -17,7 +17,6 @@ ca_password = ""
   end
 end
 
-
 bind_port = ENV['SERVER_PORT']
 ca_root_dir = ENV['CA_ROOT']
 ca_password_file = ca_root_dir + "/private/capass.txt"
@@ -95,6 +94,18 @@ post '/csr' do
   end
   STDERR.puts "Upload complete"
 
+  # validate the CSR is for the right CN suffix
+  STDERR.puts "Validating CSR is for a *.marathon.mesos CN.."
+  verify_csr_cmd = "#{openssl_cmd} req -in #{csr_tmp_file} -noout -text"
+  stdout, stderr, exit_status = Open3.capture3(verify_csr_cmd)
+
+  unless stdout.match(/CN=[^\x0d\x0a]+\.marathon(\.slave)?\.mesos/)
+    message = "This CA will not sign certificates for any CN that does not end in .marathon.mesos \n"
+    STDERR.print message
+    status 500
+    return "#{message}"
+  end
+
   # sign and return cert using 03
   STDERR.puts "Signing csr and generating cert file output, cert: #{crt_tmp_file}"
   openssl_sign_csr_cmd = "#{openssl_cmd} ca -batch -config #{openssl_ca_config} -days 375 -passin pass:#{ca_password} -in #{csr_tmp_file} -out #{crt_tmp_file}"
@@ -110,7 +121,7 @@ post '/csr' do
     message = "Something went wrong \n STDOUT: #{stdout} \n STDERR: #{stderr} \n Exit Code: #{exit_status} \n OK"
     STDERR.print message
     status 500
-    "#{message}"
+    return "#{message}"
   end
 end
 
