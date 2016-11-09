@@ -1,4 +1,9 @@
 #!/bin/bash
+# CA_REST
+# A REST API in-a-box for Certificate Authorities in development environments.
+# Ryan C. Moon (@ryancmoon)
+# 2016-11-09
+# Apache License v2.0 -- http://www.apache.org/licenses/
 # creates a CA environment, database, and file structure to store certs and sign them.
 # assumes the first argument is the CA dir root desired.
 

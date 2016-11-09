@@ -1,4 +1,10 @@
 #!/usr/bin/env ruby
+# CA_REST
+# A REST API in-a-box for Certificate Authorities in development environments.
+# Ryan C. Moon (@ryancmoon)
+# 2016-11-09
+# Apache License v2.0 -- http://www.apache.org/licenses/
+#
 # Optional certificate generation script. Can be run anywhere and pointed at the CA REST interface to get a signed certificate securely.
 
 # libs
