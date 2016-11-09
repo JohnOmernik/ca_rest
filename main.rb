@@ -43,6 +43,10 @@ unless ca_password.match(/[[:ascii:]]+/)
   abort
 end
 
+# check it tmp folder exists
+Dir.mkdir(File.dirname(__FILE__) + "/tmp", 0700) unless Dir.exists?(File.dirname(__FILE__) + "/tmp")
+
+
 print "Bind port set to #{bind_port} \n"
 print "CA Root Dir: #{ca_root_dir} \n"
 
