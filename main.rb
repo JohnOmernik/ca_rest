@@ -103,7 +103,7 @@ post '/csr' do
   verify_csr_cmd = "#{openssl_cmd} req -in #{csr_tmp_file} -noout -text"
   stdout, stderr, exit_status = Open3.capture3(verify_csr_cmd)
 
-  unless stdout.match(/CN=[^\x0d\x0a]+\.marathon(\.slave)?\.mesos/)
+  unless stdout.match(/CN=([^\x0d\x0a]+\.)?marathon(\.slave)?\.mesos/)
     message = "This CA will not sign certificates for any CN that does not end in .marathon.mesos \n"
     STDERR.print message
     status 500
