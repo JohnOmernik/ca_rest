@@ -34,7 +34,7 @@ CERT_C = "US"
 CERT_ST = "CA"
 CERT_L = "Redwood City"
 CERT_O = SERVICE_NAME
-CERT_CN = SERVICE_NAME
+CERT_CN = SERVICE_NAME + ".marathon.mesos"
 
 
 # defs
