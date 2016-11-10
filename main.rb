@@ -205,8 +205,6 @@ enable :logging
 set :port, bind_port
 set :bind, "0.0.0.0"
 
-# generate our fingerprints file
-
 
 get '/cacert' do
   crt_file = "#{options['ca_root_dir']}/cacert.pem"
