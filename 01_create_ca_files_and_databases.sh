@@ -36,6 +36,20 @@ CA_PASS=$user_pass1
 CA_HOME=$1
 CA_HOME_DIR=$(dirname $CA_HOME)
 
+# populate our cert variables and build our cert descriptor chain
+if [ -z $CACERT_C ] ; then CACERT_C="US"; fi
+if [ -z $CACERT_ST ] ; then CACERT_ST="NC"; fi
+if [ -z $CACERT_L ] ; then CACERT_L="Charlotte"; fi
+if [ -z $CACERT_O ] ; then CACERT_O="zeta"; fi
+if [ -z $CACERT_CN ] ; then CACERT_CN="marathon.mesos"; fi
+if [ -z $CACERT_OU ] ; then CACERT_OU=""; fi
+
+SUBJECT_STRING="/OU=$CACERT_OU/C=$CACERT_C/ST=$CACERT_ST/L=$CACERT_L/O=$CACERT_O/CN=$CACERT_CN"
+
+
+
+
+
 if [[ ! -w $CA_HOME_DIR ]]; then
   echo "Parent of CA Root target directory is not writable: $CA_HOME_DIR"
   exit 1
@@ -416,7 +430,7 @@ EOF
 
 
 # create ca key and cert
-/usr/bin/openssl req -new -x509 -extensions v3_ca -keyout $CA_HOME/private/cakey.pem -out $CA_HOME/cacert.pem -days 3650 -passin pass:$CA_PASS -passout pass:$CA_PASS -config $CA_HOME/openssl.cnf -subj "/C=US/ST=NC/L=Charlotte/O=zeta/CN=marathon.mesos"
+/usr/bin/openssl req -new -x509 -extensions v3_ca -keyout $CA_HOME/private/cakey.pem -out $CA_HOME/cacert.pem -days 3650 -passin pass:$CA_PASS -passout pass:$CA_PASS -config $CA_HOME/openssl.cnf -subj "$SUBJECT_STRING"
 
 # check perms
 find $CA_HOME -type d -exec chmod 700 {} \;
