@@ -11,7 +11,7 @@ require "open3"
 # we check the environment variables first to see if things are necessary.
 bind_port = ""
 
-["SERVER_PORT","CA_ROOT","JAVA_HOME"].each do |var|
+["SERVER_PORT","CA_ROOT"].each do |var|
   if ENV[var].nil?
     print "Environmental variable not set: #{var} \n\nEnvironmental variables required: \n"
     print "\tSERVER_PORT\tThe port you want the CA REST server to listen on.\n"
@@ -21,9 +21,7 @@ bind_port = ""
 end
 
 bind_port = ENV['SERVER_PORT']
-java_home = ENV['JAVA_HOME']
 ca_root = ENV['CA_ROOT']
-keytool_bin = java_home + "/bin/keytool"
 app_root = File.dirname(__FILE__)
 
 # quick check to make sure this exists
@@ -76,16 +74,6 @@ end
 
 unless options['ca_password'].match(/[[:ascii:]]+/)
   print "CA password does not look like a password: #{options['ca_password']} \n"
-  abort
-end
-
-unless File.exists?(java_home) && File.readable?(java_home)
-  print "JAVA_HOME is defined, but does not exist or is not readable: #{java_home}\n"
-  abort
-end
-
-unless File.exists?(keytool_bin) && File.readable?(keytool_bin)
-  print "Keytool is missing or not readable: #{keytool_bin}\n"
   abort
 end
 
