@@ -37,12 +37,12 @@ CA_HOME=$1
 CA_HOME_DIR=$(dirname $CA_HOME)
 
 # populate our cert variables and build our cert descriptor chain
-if [ -z $CACERT_C ] ; then CACERT_C="US"; fi
-if [ -z $CACERT_ST ] ; then CACERT_ST="NC"; fi
-if [ -z $CACERT_L ] ; then CACERT_L="Charlotte"; fi
-if [ -z $CACERT_O ] ; then CACERT_O="zeta"; fi
-if [ -z $CACERT_CN ] ; then CACERT_CN="marathon.mesos"; fi
-if [ -z $CACERT_OU ] ; then CACERT_OU=""; fi
+if [ -z "$CACERT_C" ] ; then CACERT_C="US"; fi
+if [ -z "$CACERT_ST" ] ; then CACERT_ST="NC"; fi
+if [ -z "$CACERT_L" ] ; then CACERT_L="Charlotte"; fi
+if [ -z "$CACERT_O" ] ; then CACERT_O="zeta"; fi
+if [ -z "$CACERT_CN" ] ; then CACERT_CN="marathon.mesos"; fi
+if [ -z "$CACERT_OU" ] ; then CACERT_OU=""; fi
 
 SUBJECT_STRING="/OU=$CACERT_OU/C=$CACERT_C/ST=$CACERT_ST/L=$CACERT_L/O=$CACERT_O/CN=$CACERT_CN"
 
